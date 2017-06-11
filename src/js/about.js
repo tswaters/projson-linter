@@ -1,5 +1,5 @@
 
-import {about, aboutLink, showing} from '../styles/about.less'
+import {showing} from '../styles/about.less'
 
 let aboutContainer = null
 let aboutButton = null

@@ -367,5 +367,5 @@ export default function (source, reviver) {
             return reviver.call(holder, key, val);
         }({"": result}, ""))
         : result;
-};
+}
 

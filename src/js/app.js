@@ -1,12 +1,7 @@
 
 import jsonParse from './parser'
 import './about'
-import {
-  showing,
-  finished,
-  error,
-  success
-} from '../styles/app.less'
+import {error,success} from '../styles/app.less'
 
 
 let clear = null
@@ -53,13 +48,12 @@ function keyPress (e) {
   e.ctrlKey && e.keyCode === 13 && parseCode()
 }
 
-function parseCode (e) {
+function parseCode () {
   parse.classList.remove(error)
   parse.classList.remove(success)
   errorMessage.classList.remove(error)
 
   let value = code.innerText
-  let err = null
   let obj = null
 
   try {
