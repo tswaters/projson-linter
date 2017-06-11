@@ -1,0 +1,24 @@
+
+@import "mixins";
+
+:global(#about) {
+  display: none;
+  position: fixed;
+  padding: 10px;
+  width: 100%;
+  height: 100%;
+  z-index: 9;
+  background-color: white;
+  &.showing {
+    display: block;
+  }
+}
+
+:global(#about-button) {
+  .button();
+  z-index: 10;
+  position: fixed;
+  bottom: 5px;
+  right: 10px;
+  z-index: 100;
+}
