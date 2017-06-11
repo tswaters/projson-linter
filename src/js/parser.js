@@ -235,9 +235,6 @@ var word = function () {
         next("l");
         next("l");
         return null;
-    case "I":
-        next();
-        return "I"
     }
     error("Unexpected '" + ch + "'");
 };
