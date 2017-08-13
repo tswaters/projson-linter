@@ -28,6 +28,15 @@ window.addEventListener('DOMContentLoaded', () => {
   code.focus()
 })
 
+function scrollIntoView (element) {
+  const elementRect = element.getBoundingClientRect();
+  const absoluteElementTop = elementRect.top;
+  const middleDiff = (elementRect.height / 2);
+  const scrollTopOfElement = absoluteElementTop + middleDiff;
+  const scrollY = scrollTopOfElement - (window.innerHeight / 2);
+  window.scrollTo(0, scrollY);
+}
+
 function removeErrorMessage () {
   errorMessage.classList.remove(error)
 }
@@ -71,6 +80,6 @@ function parseCode () {
     errorMessage.classList.add(error)
     errorMessage.innerHTML = " ".repeat(e.pos) + "^--" + e.message
     errorMessage.style.top = `${15 * (e.line + 1) + 10}px`
-    errorMessage.scrollIntoView()
+    setTimeout(() => scrollIntoView(errorMessage), 0)
   }
 }
