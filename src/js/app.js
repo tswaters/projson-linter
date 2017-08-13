@@ -1,5 +1,5 @@
 
-import jsonParse from './parser'
+import pretty from './pretty'
 import './about'
 import {error,success} from '../styles/app.less'
 
@@ -54,14 +54,13 @@ function parseCode () {
   errorMessage.classList.remove(error)
 
   let value = code.innerText
-  let obj = null
 
   try {
-    obj = jsonParse(value)
-    value = JSON.stringify(obj, null, 4)
+    value = pretty(value)
     parse.classList.add(success)
     code.innerHTML = value
   } catch (e) {
+    code.innerHTML = e.stringified
     parse.classList.add(error)
     errorMessage.classList.add(error)
     errorMessage.innerHTML = " ".repeat(e.pos) + "^--" + e.message

@@ -68,6 +68,8 @@
 // We are defining the function inside of another function to avoid creating
 // global variables.
 
+var stringified // ongoing string
+var gap = 0 // current indent level
 var line;   // line number we're up to
 var pos;    // position of character
 var at;     // The index of the current character
@@ -84,12 +86,67 @@ var escapee = {
 };
 var text;
 
+var indent = function (num) {
+
+    // increase or decrease the indent level
+
+    gap += num
+}
+
+var newLine = function () {
+
+    // add a new line to the stringified result
+
+    line += 1
+    const beginning = '    '.repeat(gap)
+    pos = beginning.length
+    stringified += `\n${beginning}`
+}
+
+var append = (value, escape) => {
+
+    // append a string to the stringified result; might need to scape chars
+
+    if (!escape) {
+        stringified += value
+        pos += value.length
+        return
+    }
+
+    const escapes =  {
+        "\b": "\\b",
+        "\t": "\\t",
+        "\n": "\\n",
+        "\f": "\\f",
+        "\r": "\\r",
+        "\"": "\\\"",
+        "\\": "\\\\"
+    }
+
+    const rx_escapable = /[\\"\u0000-\u001f\u007f-\u009f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g;
+    if (!rx_escapable.test(string)) {
+        stringified += value;
+        pos += value.length
+        return
+    }
+
+    const replaced = value.replace(rx_escapable, a => {
+        var c = escapes[a]
+        if (typeof c === 'string') { return c }
+        return `0000${a.charCodeAt(0).toString(16)}`.slice(-4)
+    })
+
+    stringified += replaced
+    pos += replaced.length
+}
+
 var error = function (m) {
 
 // Call error when something is wrong.
 
     throw {
         name: "SyntaxError",
+        stringified: stringified + text.substr(at - 1),
         message: m,
         at: at,
         pos: pos,
@@ -103,6 +160,7 @@ var next = function (c) {
 // If a c parameter is provided, verify that it matches the current character.
 
     if (c && c !== ch) {
+        pos += 1
         error("Expected '" + c + "' instead of '" + ch + "'");
     }
 
@@ -111,7 +169,6 @@ var next = function (c) {
 
     ch = text.charAt(at);
     at += 1;
-    pos += 1
     return ch;
 };
 
@@ -152,6 +209,7 @@ var number = function () {
     if (!isFinite(value)) {
         error("Bad number");
     } else {
+        append(value)
         return value;
     }
 };
@@ -168,8 +226,11 @@ var string = function () {
 // When parsing for string values, we must look for " and \ characters.
 
     if (ch === "\"") {
+        append(ch)
         while (next()) {
             if (ch === "\"") {
+                append(value, true)
+                append(ch)
                 next();
                 return value;
             }
@@ -203,10 +264,6 @@ var white = function () {
 // Skip whitespace.
 
     while (ch && ch <= " ") {
-        if (ch.charCodeAt(0) === 10) {
-          pos = 0;
-          line++;
-        }
         next();
     }
 };
@@ -221,6 +278,7 @@ var word = function () {
         next("r");
         next("u");
         next("e");
+        append('true');
         return true;
     case "f":
         next("f");
@@ -228,12 +286,14 @@ var word = function () {
         next("l");
         next("s");
         next("e");
+        append('false');
         return false;
     case "n":
         next("n");
         next("u");
         next("l");
         next("l");
+        append('null');
         return null;
     }
     error("Unexpected '" + ch + "'");
@@ -249,9 +309,11 @@ var array = function () {
 
     if (ch === "[") {
         next("[");
+        append('[');
         white();
         if (ch === "]") {
             next("]");
+            append(']');
             return arr;   // empty array
         }
         while (ch) {
@@ -259,9 +321,14 @@ var array = function () {
             white();
             if (ch === "]") {
                 next("]");
+                indent(-1);
+                newLine();
+                append(']');
                 return arr;
             }
             next(",");
+            append(',');
+            newLine();
             white();
         }
     }
@@ -277,15 +344,20 @@ var object = function () {
 
     if (ch === "{") {
         next("{");
+        append("{");
         white();
         if (ch === "}") {
             next("}");
+            append("}");
             return obj;   // empty object
         }
+        indent(1);
+        newLine();
         while (ch) {
             key = string();
             white();
             next(":");
+            append(": ")
             if (Object.hasOwnProperty.call(obj, key)) {
                 error("Duplicate key '" + key + "'");
             }
@@ -293,9 +365,14 @@ var object = function () {
             white();
             if (ch === "}") {
                 next("}");
+                indent(-1);
+                newLine();
+                append("}");
                 return obj;
             }
             next(",");
+            append(",");
+            newLine();
             white();
         }
     }
@@ -327,45 +404,20 @@ value = function () {
 // Return the json_parse function. It will have access to all of the above
 // functions and variables.
 
-export default function (source, reviver) {
-    var result;
+export default function (source) {
     text = source;
+    stringified = '';
+    gap = 0;
     at = 0;
     line = 0;
     pos = 1;
     ch = " ";
-    result = value();
+    value();
     white();
     if (ch) {
         error("Syntax error");
     }
 
-
-// If there is a reviver function, we recursively walk the new structure,
-// passing each name/value pair to the reviver function for possible
-// transformation, starting with a temporary root object that holds the result
-// in an empty key. If there is not a reviver function, we simply return the
-// result.
-
-    return (typeof reviver === "function")
-        ? (function walk(holder, key) {
-            var k;
-            var v;
-            var val = holder[key];
-            if (val && typeof val === "object") {
-                for (k in val) {
-                    if (Object.prototype.hasOwnProperty.call(val, k)) {
-                        v = walk(val, k);
-                        if (v !== undefined) {
-                            val[k] = v;
-                        } else {
-                            delete val[k];
-                        }
-                    }
-                }
-            }
-            return reviver.call(holder, key, val);
-        }({"": result}, ""))
-        : result;
+    return stringified
 }
 
