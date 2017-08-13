@@ -20,6 +20,7 @@ window.addEventListener('DOMContentLoaded', () => {
   errorMessage = document.getElementById('parse-error')
 
   code = document.getElementById('src')
+  code.addEventListener('copy', cleanCopy)
   code.addEventListener('paste', cleanPaste)
   code.addEventListener('input', removeErrorMessage)
   code.addEventListener('click', removeErrorMessage)
@@ -29,6 +30,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function removeErrorMessage () {
   errorMessage.classList.remove(error)
+}
+
+function cleanCopy (e) {
+  e.preventDefault()
+  e.clipboardData.setData('text/plain', code.innerText);
 }
 
 function cleanPaste (e) {
