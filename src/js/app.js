@@ -50,6 +50,7 @@ function cleanPaste (e) {
   e.preventDefault();
   var text = e.clipboardData.getData("text/plain");
   document.execCommand("insertHTML", false, text);
+  parseCode()
 }
 
 function clearCode () {
