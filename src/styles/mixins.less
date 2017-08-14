@@ -10,9 +10,25 @@
   .hover(lightgray, darkgray);
   cursor: pointer;
   position: fixed;
-  width: 50px;
+  right: 10px;
+  width: 65px;
   height: 30px;
   z-index: 5;
   border: 1px solid gray;
   border-radius: 5px;
+  &.showing { display: block; }
+  &.hiding { display: none; }
+}
+
+.form() {
+  position: fixed;
+  display: none;
+  top: 10vw;
+  left: 25vw;
+  width: 50vw;
+  height: 25vw;
+  z-index: 9;
+  background-color: white;
+  &.showing { display: block; }
+  &.hiding { display: none; }
 }

@@ -1,8 +1,10 @@
 
 import pretty from './pretty'
 import './about'
+import './options-form'
+import options from './options'
 import {error,success} from '../styles/app.less'
-
+import buttonToggle from './button-toggle'
 
 let clear = null
 let parse = null
@@ -10,6 +12,9 @@ let code = null
 let errorMessage = null
 
 window.addEventListener('DOMContentLoaded', () => {
+
+  buttonToggle.register('clear')
+  buttonToggle.register('parse')
 
   clear = document.getElementById('clear')
   clear.addEventListener('click', clearCode)
@@ -43,7 +48,11 @@ function removeErrorMessage () {
 
 function cleanCopy (e) {
   e.preventDefault()
-  e.clipboardData.setData('text/plain', code.innerText);
+  let value = code.innerText
+  if (options.copyAsCrLf) {
+    value = value.replace(/\n/g, '\r\n')
+  }
+  e.clipboardData.setData('text/plain', value);
 }
 
 function cleanPaste (e) {

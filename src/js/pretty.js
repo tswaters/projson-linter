@@ -3,6 +3,8 @@
 
 // I turned it into a module, and made it return the position and line when a parser error occurs.
 
+import options from './options'
+
 /*
     json_parse.js
     2016-05-02
@@ -85,6 +87,7 @@ var escapee = {
     t: "\t"
 };
 var text;
+var indentSpace;
 
 var indent = function (num) {
 
@@ -98,7 +101,7 @@ var newLine = function () {
     // add a new line to the stringified result
 
     line += 1
-    const beginning = '    '.repeat(gap)
+    const beginning = indentSpace.repeat(gap)
     pos = beginning.length
     stringified += `\n${beginning}`
 }
@@ -407,6 +410,8 @@ value = function () {
 export default function (source) {
     text = source;
     stringified = '';
+    var indentType = options.tabType === 'tabs' ? '\t' : ' '
+    indentSpace = indentType.repeat(options.length)
     gap = 0;
     at = 0;
     line = 0;
