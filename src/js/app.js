@@ -3,7 +3,7 @@ import pretty from './pretty'
 import './about'
 import './options-form'
 import options from './options'
-import {error,success} from '../styles/app.less'
+import {error, success} from '../styles/button.less'
 import buttonToggle from './button-toggle'
 
 let clear = null

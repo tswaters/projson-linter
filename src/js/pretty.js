@@ -101,7 +101,7 @@ var newLine = function () {
     // add a new line to the stringified result
 
     line += 1
-    const beginning = indentSpace.repeat(gap)
+    const beginning = indentSpace.repeat(Math.max(0, gap))
     pos = beginning.length
     stringified += `\n${beginning}`
 }
@@ -319,6 +319,8 @@ var array = function () {
             append(']');
             return arr;   // empty array
         }
+        indent(1);
+        newLine();
         while (ch) {
             arr.push(value());
             white();
