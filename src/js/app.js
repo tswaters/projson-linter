@@ -58,7 +58,7 @@ function cleanCopy (e) {
 function cleanPaste (e) {
   e.preventDefault();
   var text = e.clipboardData.getData("text/plain");
-  document.execCommand("insertHTML", false, text);
+  document.execCommand("insertText", false, text);
   parseCode()
 }
 
@@ -83,9 +83,9 @@ function parseCode () {
   try {
     value = pretty(value)
     parse.classList.add(success)
-    code.innerHTML = value
+    code.innerText = value
   } catch (e) {
-    code.innerHTML = e.stringified
+    code.innerText = e.stringified
     parse.classList.add(error)
     errorMessage.classList.add(error)
     errorMessage.innerHTML = " ".repeat(e.pos) + "^--" + e.message
