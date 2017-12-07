@@ -48,8 +48,10 @@ function removeErrorMessage () {
 }
 
 function cleanCopy (e) {
+  let value = window.getSelection().getRangeAt(0).cloneContents().textContent
+  if (!value) { return }
+
   e.preventDefault()
-  let value = code.innerText
   if (options.copyAsCrLf) {
     value = value.replace(/\n/g, '\r\n')
   }
@@ -84,9 +86,9 @@ function parseCode () {
   try {
     value = pretty(value)
     parse.classList.add(success)
-    code.innerText = value
+    code.textContent = value
   } catch (e) {
-    code.innerText = e.stringified
+    code.textContent = e.stringified
     parse.classList.add(error)
     errorMessage.classList.add(parseError)
     errorMessage.innerHTML = " ".repeat(e.pos) + "^--" + e.message
