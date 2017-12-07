@@ -3,6 +3,7 @@ import pretty from './pretty'
 import './about'
 import './options-form'
 import options from './options'
+import {error as parseError} from '../styles/app.less'
 import {error, success} from '../styles/button.less'
 import buttonToggle from './button-toggle'
 
@@ -43,7 +44,7 @@ function scrollIntoView (element) {
 }
 
 function removeErrorMessage () {
-  errorMessage.classList.remove(error)
+  errorMessage.classList.remove(parseError)
 }
 
 function cleanCopy (e) {
@@ -63,7 +64,7 @@ function cleanPaste (e) {
 }
 
 function clearCode () {
-  errorMessage.classList.remove(error)
+  errorMessage.classList.remove(parseError)
   parse.classList.remove(error)
   parse.classList.remove(success)
   code.innerHTML = ''
@@ -76,7 +77,7 @@ function keyPress (e) {
 function parseCode () {
   parse.classList.remove(error)
   parse.classList.remove(success)
-  errorMessage.classList.remove(error)
+  errorMessage.classList.remove(parseError)
 
   let value = code.innerText
 
@@ -87,7 +88,7 @@ function parseCode () {
   } catch (e) {
     code.innerText = e.stringified
     parse.classList.add(error)
-    errorMessage.classList.add(error)
+    errorMessage.classList.add(parseError)
     errorMessage.innerHTML = " ".repeat(e.pos) + "^--" + e.message
     errorMessage.style.top = `${15 * (e.line + 1) + 10}px`
     setTimeout(() => scrollIntoView(errorMessage), 0)
