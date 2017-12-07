@@ -71,7 +71,7 @@ function clearCode () {
 }
 
 function keyPress (e) {
-  e.ctrlKey && e.keyCode === 13 && parseCode()
+  e.ctrlKey && (e.keyCode === 13 || e.keyCode === 10) && parseCode()
 }
 
 function parseCode () {
