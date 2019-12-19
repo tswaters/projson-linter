@@ -1,4 +1,4 @@
-@import 'mixins';
+@import "mixins";
 
 :global(.close-button) {
   .button();
@@ -10,8 +10,12 @@
 :global(#parse) {
   .button();
   top: 5px;
-  &.error { .hover(lightcoral, coral) }
-  &.success { .hover(lightgreen, greenyellow); }
+  &.error {
+    .hover(lightcoral, coral);
+  }
+  &.success {
+    .hover(lightgreen, greenyellow);
+  }
 }
 
 :global(#clear) {

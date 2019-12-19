@@ -1,38 +1,7 @@
-
 @import 'mixins';
 
 * {
   box-sizing: border-box;
-}
-
-html,
-body {
-  padding: 0;
-  margin: 0;
-  height: 100%;
-  &.hiding {
-    background-color: #eeeeee;
-    :global(#parse-error) {
-      display: none;
-    }
-  }
-}
-
-:global(#src) {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: ~"calc(100% - 83px)";
-  min-height: 100%;
-  max-width: 100%;
-  border: 0;
-  padding: 10px;
-  font-size: 13px;
-  white-space: pre-wrap;
-  font-family: monospace;
-  &.hiding {
-    display: none;
-  }
 }
 
 :global(#parse-error) {
@@ -48,11 +17,40 @@ body {
   }
 }
 
+:global(#src) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: ~'calc(100% - 83px)';
+  min-height: 100%;
+  max-width: 100%;
+  border: 0;
+  padding: 10px;
+  font-size: 13px;
+  white-space: pre-wrap;
+  font-family: monospace;
+  &.hiding {
+    display: none;
+  }
+}
+
 :global(#about) {
-  .form()
+  .form();
 }
 
 :global(#options) {
-  .form()
+  .form();
 }
 
+html,
+body {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  &.hiding {
+    background-color: #eee;
+    :global(#parse-error) {
+      display: none;
+    }
+  }
+}

@@ -1,4 +1,3 @@
-
 .hover(@main, @secondary) {
   background-color: @main;
   &:hover {
@@ -16,8 +15,12 @@
   z-index: 5;
   border: 1px solid gray;
   border-radius: 5px;
-  &.showing { display: block; }
-  &.hiding { display: none; }
+  &.showing {
+    display: block;
+  }
+  &.hiding {
+    display: none;
+  }
 }
 
 .form() {
@@ -29,6 +32,10 @@
   height: 25vw;
   z-index: 9;
   background-color: white;
-  &.showing { display: block; }
-  &.hiding { display: none; }
+  &.showing {
+    display: block;
+  }
+  &.hiding {
+    display: none;
+  }
 }
