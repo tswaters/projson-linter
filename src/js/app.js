@@ -87,7 +87,7 @@ function parseCode() {
   let value = code.innerText
 
   try {
-    value = pretty(value)
+    value = pretty(value, { tabType: options.tabType, length: options.length })
     parse.classList.add(success)
     code.textContent = value
   } catch (e) {

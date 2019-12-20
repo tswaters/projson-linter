@@ -3,8 +3,6 @@
 
 // I turned it into a module, and made it return the position and line when a parser error occurs.
 
-import options from './options'
-
 /*
     json_parse.js
     2016-05-02
@@ -393,11 +391,11 @@ value = function() {
 // Return the json_parse function. It will have access to all of the above
 // functions and variables.
 
-export default function(source) {
+export default function(source, { tabType = 'string', length = 4 } = {}) {
   text = source
   stringified = ''
-  var indentType = options.tabType === 'tabs' ? '\t' : ' '
-  indentSpace = indentType.repeat(options.length)
+  var indentType = tabType === 'tabs' ? '\t' : ' '
+  indentSpace = indentType.repeat(length)
   gap = 0
   at = 0
   line = 0
