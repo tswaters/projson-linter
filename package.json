@@ -8,12 +8,15 @@
     "prebuild": "rimraf dist",
     "build": "webpack -p",
     "build-watch": "webpack -w"
+    "build-watch": "webpack -w",
+    "test": "mocha"
   },
   "author": "Tyler Waters <tyler.waters@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.7.7",
     "@babel/preset-env": "^7.7.7",
+    "@babel/register": "^7.7.7",
     "babel-loader": "^8.0.6",
     "css-loader": "^3.4.0",
     "eslint": "^6.7.2",
@@ -22,6 +25,7 @@
     "less": "^3.10.3",
     "less-loader": "^5.0.0",
     "mini-css-extract-plugin": "^0.8.2",
+    "mocha": "^6.2.2",
     "optimize-css-assets-webpack-plugin": "^5.0.3",
     "prettier": "^1.19.1",
     "rimraf": "^3.0.0",
@@ -33,9 +37,27 @@
     "webpack-cli": "^3.3.10"
   },
   "dependencies": {},
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": "> 1%, not dead, not ie < 13"
+        }
+      ]
+    ],
+    "sourceMaps": true,
+    "retainLines": true
+  },
   "prettier": {
     "semi": false,
     "singleQuote": true
+  },
+  "mocha": {
+    "spec": [
+      "test/parser.js"
+    ],
+    "require": "@babel/register"
   },
   "eslintConfig": {
     "env": {
@@ -43,12 +65,28 @@
       "es6": true
     },
     "parserOptions": {
+      "ecmaVersion": 2019,
       "sourceType": "module"
     },
+    "overrides": [
+      {
+        "files": [
+          "test/**/*.js"
+        ],
+        "env": {
+          "node": true,
+          "mocha": true
+        }
+      }
+    ],
     "extends": [
       "eslint:recommended",
       "eslint-config-prettier"
-    ]
+    ],
+    "rules": {
+      "no-control-regex": "off",
+      "no-misleading-character-class": "off"
+    }
   },
   "stylelint": {
     "extends": "stylelint-config-standard",

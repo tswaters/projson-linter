@@ -21,14 +21,7 @@ module.exports = (mode, argv) => {
       rules: [
         {
           test: /\.js$/,
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              ['@babel/preset-env', { targets: '> 1%, not dead, not ie < 13' }]
-            ],
-            sourceMaps: true,
-            retainLines: true
-          }
+          loader: 'babel-loader'
         },
         {
           test: /\.(less|css)$/,
