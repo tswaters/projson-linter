@@ -178,18 +178,35 @@ var number = function() {
   if (ch === '-') {
     string = '-'
     next('-')
+
+    // can't have a period after a negative
+    if (ch === '.') this.error('Bad number')
   }
+
+  const leadingZero = ch === '0'
+  let seenDelim = false
+
   while (ch >= '0' && ch <= '9') {
     string += ch
     next()
+    if (ch === '0' && leadingZero) error('Bad number')
   }
+
   if (ch === '.') {
+    seenDelim = true
     string += '.'
+    next()
+
+    // exponents cant follow a period.
+    if (ch === 'e' || ch === 'E') error('Bad number')
+
+    string += ch
     while (next() && ch >= '0' && ch <= '9') {
       string += ch
     }
   }
   if (ch === 'e' || ch === 'E') {
+    seenDelim = true
     string += ch
     next()
     if (ch === '-' || ch === '+') {
@@ -201,6 +218,17 @@ var number = function() {
       next()
     }
   }
+
+  // at this point we have a number in `string`
+  // look for a few edge cases here,
+  // otherwise use type coersion to turn it into a number.
+  if (
+    (leadingZero && !seenDelim && string !== '0' && string !== '-0') ||
+    string.endsWith('.')
+  ) {
+    error('Bad number')
+  }
+
   value = +string
   if (!isFinite(value)) {
     error('Bad number')
