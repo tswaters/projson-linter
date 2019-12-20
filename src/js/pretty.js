@@ -257,6 +257,10 @@ var string = function() {
         next()
         return value
       }
+
+      // control characters must be escaped
+      if (/[\u0000-\u001F]/.test(ch)) error('Bad string')
+
       if (ch === '\\') {
         next()
         if (ch === 'u') {
