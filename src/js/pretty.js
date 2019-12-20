@@ -255,11 +255,7 @@ var string = function() {
 }
 
 var white = function() {
-  // Skip whitespace.
-
-  while (ch && ch <= ' ') {
-    next()
-  }
+  while (ch && /[\u0020\t\r\n]/.test(ch)) next()
 }
 
 var word = function() {
