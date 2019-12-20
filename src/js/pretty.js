@@ -353,9 +353,6 @@ var object = function() {
       white()
       next(':')
       append(': ')
-      if (Object.hasOwnProperty.call(obj, key)) {
-        error("Duplicate key '" + key + "'")
-      }
       obj[key] = value()
       white()
       if (ch === '}') {
