@@ -264,7 +264,7 @@ var string = function() {
           for (i = 0; i < 4; i += 1) {
             hex = parseInt(next(), 16)
             if (!isFinite(hex)) {
-              break
+              error('Bad string')
             }
             uffff = uffff * 16 + hex
           }
