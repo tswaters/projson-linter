@@ -1,3 +1,30 @@
+:root .dark-mode {
+  --bg-success: lightgreen;
+  --bg-success-hover: greenyellow;
+  --fg-error: red;
+  --bg-error: lightcoral;
+  --bg-error-hover: coral;
+  --bg: #111;
+  --fg: #eee;
+  --button-border: gray;
+  --button-bg-hover: lightgray;
+  --button-bg: darkgray;
+  --form-bg: #ccc;
+}
+
+:root .light-mode {
+  --bg-success: lightgreen;
+  --bg-success-hover: greenyellow;
+  --bg-error: lightcoral;
+  --bg-error-hover: coral;
+  --bg: #eee;
+  --fg: #000;
+  --button-border: gray;
+  --button-bg: lightgray;
+  --button-bg-hover: darkgray;
+  --form-bg: #ccc;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -7,11 +34,14 @@ body {
   padding: 0;
   margin: 0;
   height: 100%;
+  background-color: var(--bg);
+  color: var(--fg);
 }
 
 body.hiding,
 html.hiding {
-  background-color: #eee;
+  background: var(--bg);
+  color: var(--foreground-color);
   display: block;
 }
 
@@ -29,19 +59,19 @@ html.hiding :global(#parse-error) {
 }
 
 .error {
-  background-color: lightcoral !important;
+  background: var(--bg-error) !important;
 }
 
 .error:hover {
-  background-color: coral !important;
+  background: var(--bg-error-hover) !important;
 }
 
 .success {
-  background-color: lightgreen !important;
+  background: var(--bg-success) !important;
 }
 
 .success:hover {
-  background-color: greenyellow !important;
+  background: var(--bg-success-hover) !important;
 }
 
 :global(#parse-error) {
@@ -49,14 +79,13 @@ html.hiding :global(#parse-error) {
   white-space: pre-wrap;
   font-family: monospace;
   z-index: 2;
-  background-color: white;
-  color: red;
+  background: transparent !important;
+  color: var(--fg-error);
   position: relative;
 }
 
 :global(#parse-error).error {
   display: block;
-  background-color: white !important;
 }
 
 :global(#src) {
@@ -80,8 +109,9 @@ html.hiding :global(#parse-error) {
   left: 25vw;
   width: 50vw;
   height: 25vw;
+  padding: 20px;
   z-index: 9;
-  background-color: white;
+  background: var(--form-bg);
 }
 
 .form.showing {
@@ -95,8 +125,8 @@ html.hiding :global(#parse-error) {
 }
 
 .button {
-  background-color: lightgray;
-  border: 1px solid gray;
+  background: var(--button-bg);
+  border: 1px solid var(--button-border);
   border-radius: 5px;
   cursor: pointer;
   position: fixed;
@@ -107,7 +137,7 @@ html.hiding :global(#parse-error) {
 }
 
 .button:hover {
-  background-color: darkgray;
+  background: var(--button-bg-hover);
 }
 
 .button.showing {
