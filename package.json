@@ -6,9 +6,8 @@
   "scripts": {
     "lint": "stylelint \"src/styles/*.less\" && eslint src/js",
     "prebuild": "rimraf dist",
-    "build": "webpack -p",
-    "build-watch": "webpack -w"
-    "build-watch": "webpack -w",
+    "build": "webpack --mode=production",
+    "build-watch": "webpack --mode=development -w",
     "test": "mocha"
   },
   "author": "Tyler Waters <tyler.waters@gmail.com>",
