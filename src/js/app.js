@@ -10,6 +10,7 @@ let clear = null
 let parse = null
 let code = null
 let errorMessage = null
+let position = null
 
 window.addEventListener('DOMContentLoaded', () => {
   buttonToggle.register('clear')
@@ -28,8 +29,20 @@ window.addEventListener('DOMContentLoaded', () => {
   code.addEventListener('input', removeErrorMessage)
   code.addEventListener('click', removeErrorMessage)
   code.addEventListener('keypress', keyPress)
+  code.addEventListener('mousedown', saveCursorPosition)
+  code.addEventListener('mouseup', saveCursorPosition)
+  code.addEventListener('keydown', saveCursorPosition)
+  code.addEventListener('keyup', saveCursorPosition)
   code.focus()
 })
+
+function saveCursorPosition() {
+  const sel = window.getSelection()
+  if (sel.rangeCount) {
+    const range = sel.getRangeAt(0)
+    position = range.startOffset
+  }
+}
 
 function scrollIntoView(element) {
   const elementRect = element.getBoundingClientRect()
@@ -46,8 +59,12 @@ function removeErrorMessage() {
 
 function cleanPaste(e) {
   e.preventDefault()
-  var text = e.clipboardData.getData('text/plain')
-  document.execCommand('insertText', false, text)
+  saveCursorPosition()
+  document.execCommand(
+    'insertText',
+    false,
+    e.clipboardData.getData('text/plain')
+  )
   parseCode()
 }
 
@@ -67,18 +84,29 @@ function parseCode() {
   parse.classList.remove(success)
   errorMessage.classList.remove(parseError)
 
-  let value = code.innerText
+  let value = null
 
   try {
-    const parsed = new Parser(value, options)
+    const parsed = new Parser(code.innerText, options)
     parse.classList.add(success)
-    code.textContent = parsed.stringified
+    value = parsed.stringified
   } catch (e) {
-    code.textContent = e.stringified
+    value = e.stringified
     parse.classList.add(error)
     errorMessage.classList.add(parseError)
     errorMessage.innerHTML = ' '.repeat(e.pos) + '^--' + e.message
     errorMessage.style.top = `${15 * (e.line + 1) + 10}px`
     setTimeout(() => scrollIntoView(errorMessage), 0)
+  }
+
+  code.textContent = value
+
+  // restore cursor position if we found one
+  if (position != null) {
+    const sel = window.getSelection()
+    const range = document.createRange()
+    range.setStart(code.firstChild, position)
+    sel.removeAllRanges()
+    sel.addRange(range)
   }
 }
