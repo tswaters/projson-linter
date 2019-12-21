@@ -1,79 +1,7 @@
-// I took this from Douglas Crockford
-// https://github.com/douglascrockford/JSON-js/blob/master/json_parse.js
+// Originally started from Douglas Crockford's impl
+// https://github.com/douglascrockford/JSON-js/blob/9139a9f/json_parse.js
 
-// I turned it into a module, and made it return the position and line when a parser error occurs.
-
-/*
-    json_parse.js
-    2016-05-02
-
-    Public Domain.
-
-    NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
-
-    This file creates a json_parse function.
-
-        json_parse(text, reviver)
-            This method parses a JSON text to produce an object or array.
-            It can throw a SyntaxError exception.
-
-            The optional reviver parameter is a function that can filter and
-            transform the results. It receives each of the keys and values,
-            and its return value is used instead of the original value.
-            If it returns what it received, then the structure is not modified.
-            If it returns undefined then the member is deleted.
-
-            Example:
-
-            // Parse the text. Values that look like ISO date strings will
-            // be converted to Date objects.
-
-            myData = json_parse(text, function (key, value) {
-                var a;
-                if (typeof value === "string") {
-                    a =
-/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
-                    if (a) {
-                        return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4],
-                            +a[5], +a[6]));
-                    }
-                }
-                return value;
-            });
-
-    This is a reference implementation. You are free to copy, modify, or
-    redistribute.
-
-    This code should be minified before deployment.
-    See http://javascript.crockford.com/jsmin.html
-
-    USE YOUR OWN COPY. IT IS EXTREMELY UNWISE TO LOAD CODE FROM SERVERS YOU DO
-    NOT CONTROL.
-*/
-
-/*jslint for */
-
-/*property
-    at, b, call, charAt, f, fromCharCode, hasOwnProperty, message, n, name,
-    prototype, push, r, t, text
-*/
-;('use strict')
-
-// This is a function that can parse a JSON text, producing a JavaScript
-// data structure. It is a simple, recursive descent parser. It does not use
-// eval or regular expressions, so it can be used as a model for implementing
-// a JSON parser in other languages.
-
-// We are defining the function inside of another function to avoid creating
-// global variables.
-
-var stringified // ongoing string
-var gap = 0 // current indent level
-var line // line number we're up to
-var pos // position of character
-var at // The index of the current character
-var ch // The current character
-var escapee = {
+const escapee = {
   '"': '"',
   '\\': '\\',
   '/': '/',
@@ -83,357 +11,326 @@ var escapee = {
   r: '\r',
   t: '\t'
 }
-var text
-var indentSpace
 
-var indent = function(num) {
-  // increase or decrease the indent level
-
-  gap += num
+const escapes = {
+  '\b': '\\b',
+  '\t': '\\t',
+  '\n': '\\n',
+  '\f': '\\f',
+  '\r': '\\r',
+  '"': '\\"',
+  '\\': '\\\\'
 }
 
-var newLine = function() {
-  // add a new line to the stringified result
-
-  line += 1
-  const beginning = indentSpace.repeat(Math.max(0, gap))
-  pos = beginning.length
-  stringified += `\n${beginning}`
-}
-
-var append = (value, escape) => {
-  // append a string to the stringified result; might need to scape chars
-
-  if (!escape) {
-    stringified += value
-    pos += value.length
-    return
-  }
-
-  const escapes = {
-    '\b': '\\b',
-    '\t': '\\t',
-    '\n': '\\n',
-    '\f': '\\f',
-    '\r': '\\r',
-    '"': '\\"',
-    '\\': '\\\\'
-  }
-  /* eslint-disable-next-line */
+const escape = (value, shouldEscape) => {
   const rx_escapable = /[\\"\u0000-\u001f\u007f-\u009f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g
-  if (!rx_escapable.test(string)) {
-    stringified += value
-    pos += value.length
-    return
-  }
 
-  const replaced = value.replace(rx_escapable, a => {
-    var c = escapes[a]
-    if (typeof c === 'string') {
-      return c
+  return !shouldEscape || !rx_escapable.test(value)
+    ? value
+    : value.replace(rx_escapable, a =>
+        escapes[a]
+          ? escapes[a]
+          : `0000${a.charCodeAt(0).toString(16)}`.slice(-4)
+      )
+}
+
+export class Parser {
+  constructor(
+    source,
+    { indentType = ' ', indentSize = 2, gap = 0, line = 0 } = {}
+  ) {
+    this.text = source
+    this.indentType = indentType
+    this.indentSize = indentSize
+    this.indentSpace = indentType.repeat(indentSize)
+    this.gap = gap
+    this.line = line
+    this.stringified = ''
+    this.at = 0
+    this.pos = 1
+    this.ch = ' '
+    this.value()
+    this.white()
+    if (this.ch) {
+      this.error('Syntax error')
     }
-    return `0000${a.charCodeAt(0).toString(16)}`.slice(-4)
-  })
-
-  stringified += replaced
-  pos += replaced.length
-}
-
-var error = function(m) {
-  // Call error when something is wrong.
-
-  throw {
-    name: 'SyntaxError',
-    stringified: stringified + text.substr(at - 1),
-    message: m,
-    at: at,
-    pos: pos,
-    line: line,
-    text: text
   }
-}
 
-var next = function(c) {
-  // If a c parameter is provided, verify that it matches the current character.
+  error(m) {
+    throw {
+      name: 'SyntaxError',
+      stringified: this.stringified + this.text.substr(this.at - 1),
+      message: m,
+      at: this.at,
+      pos: this.pos,
+      line: this.line,
+      text: this.text
+    }
+  }
 
-  if (c && c !== ch) {
-    pos += 1
-    error("Expected '" + c + "' instead of '" + ch + "'")
+  indent(num) {
+    this.gap += num
+  }
+
+  newLine() {
+    this.line += 1
+    const beginning = this.indentSpace.repeat(Math.max(0, this.gap))
+    this.pos = beginning.length
+    this.stringified += `\n${beginning}`
+  }
+
+  // Skip whitespace.
+  white() {
+    while (this.ch && /[\u0020\t\r\n]/.test(this.ch)) this.next()
+  }
+
+  append(value, shouldEscape) {
+    const escaped = escape(value, shouldEscape)
+    this.stringified += escaped
+    this.pos += escaped.length
   }
 
   // Get the next character. When there are no more characters,
   // return the empty string.
+  // If a c parameter is provided, verify that it matches the current character.
+  next(c) {
+    if (c && c !== this.ch) {
+      this.pos += 1
+      this.error("Expected '" + c + "' instead of '" + this.ch + "'")
+    }
 
-  ch = text.charAt(at)
-  at += 1
-  return ch
-}
+    this.ch = this.text.charAt(this.at)
+    this.at += 1
+    return this.ch
+  }
 
-var number = function() {
   // Parse a number value.
+  number() {
+    let value
+    let string = ''
 
-  var value
-  var string = ''
+    if (this.ch === '-') {
+      string = '-'
+      this.next('-')
 
-  if (ch === '-') {
-    string = '-'
-    next('-')
+      // can't have a period after a negative
+      if (this.ch === '.') this.error('Bad number')
+    }
 
-    // can't have a period after a negative
-    if (ch === '.') this.error('Bad number')
-  }
+    const leadingZero = this.ch === '0'
+    let seenDelim = false
 
-  const leadingZero = ch === '0'
-  let seenDelim = false
+    while (this.ch >= '0' && this.ch <= '9') {
+      string += this.ch
+      this.next()
+      if (this.ch === '0' && leadingZero) this.error('Bad number')
+    }
 
-  while (ch >= '0' && ch <= '9') {
-    string += ch
-    next()
-    if (ch === '0' && leadingZero) error('Bad number')
-  }
+    if (this.ch === '.') {
+      seenDelim = true
+      string += '.'
+      this.next()
 
-  if (ch === '.') {
-    seenDelim = true
-    string += '.'
-    next()
+      // exponents cant follow a period.
+      if (this.ch === 'e' || this.ch === 'E') this.error('Bad number')
 
-    // exponents cant follow a period.
-    if (ch === 'e' || ch === 'E') error('Bad number')
+      string += this.ch
+      while (this.next() && this.ch >= '0' && this.ch <= '9') string += this.ch
+    }
 
-    string += ch
-    while (next() && ch >= '0' && ch <= '9') {
-      string += ch
+    if (this.ch === 'e' || this.ch === 'E') {
+      seenDelim = true
+      string += this.ch
+      this.next()
+      if (this.ch === '-' || this.ch === '+') {
+        string += this.ch
+        this.next()
+      }
+      while (this.ch >= '0' && this.ch <= '9') {
+        string += this.ch
+        this.next()
+      }
+    }
+
+    // at this point we have a number in `string`
+    // look for a few edge cases here,
+    // otherwise use type coersion to turn it into a number.
+    if (
+      (leadingZero && !seenDelim && string !== '0' && string !== '-0') ||
+      string.endsWith('.')
+    ) {
+      this.error('Bad number')
+    }
+
+    value = +string
+
+    if (!isFinite(value)) {
+      this.error('Bad number')
+    } else {
+      this.append(value)
+      return value
     }
   }
-  if (ch === 'e' || ch === 'E') {
-    seenDelim = true
-    string += ch
-    next()
-    if (ch === '-' || ch === '+') {
-      string += ch
-      next()
-    }
-    while (ch >= '0' && ch <= '9') {
-      string += ch
-      next()
-    }
-  }
 
-  // at this point we have a number in `string`
-  // look for a few edge cases here,
-  // otherwise use type coersion to turn it into a number.
-  if (
-    (leadingZero && !seenDelim && string !== '0' && string !== '-0') ||
-    string.endsWith('.')
-  ) {
-    error('Bad number')
-  }
-
-  value = +string
-  if (!isFinite(value)) {
-    error('Bad number')
-  } else {
-    append(value)
-    return value
-  }
-}
-
-var string = function() {
   // Parse a string value.
-
-  var hex
-  var i
-  var value = ''
-  var uffff
-
   // When parsing for string values, we must look for " and \ characters.
+  string() {
+    let value = ''
 
-  if (ch === '"') {
-    append(ch)
-    while (next()) {
-      if (ch === '"') {
-        append(value, true)
-        append(ch)
-        next()
-        return value
-      }
+    if (this.ch === '"') {
+      this.append(this.ch)
 
-      // control characters must be escaped
-      if (/[\u0000-\u001F]/.test(ch)) error('Bad string')
-
-      if (ch === '\\') {
-        next()
-        if (ch === 'u') {
-          uffff = 0
-          for (i = 0; i < 4; i += 1) {
-            hex = parseInt(next(), 16)
-            if (!isFinite(hex)) {
-              error('Bad string')
-            }
-            uffff = uffff * 16 + hex
-          }
-          value += String.fromCharCode(uffff)
-        } else if (typeof escapee[ch] === 'string') {
-          value += escapee[ch]
-        } else {
-          break
+      while (this.next()) {
+        if (this.ch === '"') {
+          this.append(value, true)
+          this.append(this.ch)
+          this.next()
+          return value
         }
-      } else {
-        value += ch
+
+        // control characters must be escaped
+        if (/[\u0000-\u001F]/.test(this.ch)) this.error('Bad string')
+
+        if (this.ch === '\\') {
+          this.next()
+          if (this.ch === 'u') {
+            let uffff = 0
+            for (let i = 0; i < 4; i += 1) {
+              let hex = parseInt(this.next(), 16)
+              // bad hex is bad, mkay?
+              if (!isFinite(hex)) this.error('Bad string')
+              uffff = uffff * 16 + hex
+            }
+            value += String.fromCharCode(uffff)
+          } else if (escapee[this.ch]) {
+            value += escapee[this.ch]
+          } else {
+            break
+          }
+        } else {
+          value += this.ch
+        }
       }
     }
+    this.error('Bad string')
   }
-  error('Bad string')
-}
 
-var white = function() {
-  while (ch && /[\u0020\t\r\n]/.test(ch)) next()
-}
-
-var word = function() {
   // true, false, or null.
-
-  switch (ch) {
-    case 't':
-      next('t')
-      next('r')
-      next('u')
-      next('e')
-      append('true')
-      return true
-    case 'f':
-      next('f')
-      next('a')
-      next('l')
-      next('s')
-      next('e')
-      append('false')
-      return false
-    case 'n':
-      next('n')
-      next('u')
-      next('l')
-      next('l')
-      append('null')
-      return null
+  word() {
+    switch (this.ch) {
+      case 't':
+        this.next('t')
+        this.next('r')
+        this.next('u')
+        this.next('e')
+        this.append('true')
+        return true
+      case 'f':
+        this.next('f')
+        this.next('a')
+        this.next('l')
+        this.next('s')
+        this.next('e')
+        this.append('false')
+        return false
+      case 'n':
+        this.next('n')
+        this.next('u')
+        this.next('l')
+        this.next('l')
+        this.append('null')
+        return null
+    }
+    this.error("Unexpected '" + this.ch + "'")
   }
-  error("Unexpected '" + ch + "'")
-}
 
-var value // Place holder for the value function.
-
-var array = function() {
   // Parse an array value.
+  array() {
+    const arr = []
 
-  var arr = []
-
-  if (ch === '[') {
-    next('[')
-    append('[')
-    white()
-    if (ch === ']') {
-      next(']')
-      append(']')
-      return arr // empty array
-    }
-    indent(1)
-    newLine()
-    while (ch) {
-      arr.push(value())
-      white()
-      if (ch === ']') {
-        next(']')
-        indent(-1)
-        newLine()
-        append(']')
-        return arr
+    if (this.ch === '[') {
+      this.next('[')
+      this.append('[')
+      this.white()
+      if (this.ch === ']') {
+        this.next(']')
+        this.append(']')
+        return arr // empty array
       }
-      next(',')
-      append(',')
-      newLine()
-      white()
+      this.indent(1)
+      this.newLine()
+      while (this.ch) {
+        arr.push(this.value())
+        this.white()
+        if (this.ch === ']') {
+          this.next(']')
+          this.indent(-1)
+          this.newLine()
+          this.append(']')
+          return arr
+        }
+        this.next(',')
+        this.append(',')
+        this.newLine()
+        this.white()
+      }
     }
+    this.error('Bad array')
   }
-  error('Bad array')
-}
 
-var object = function() {
   // Parse an object value.
+  object() {
+    const obj = {}
 
-  var key
-  var obj = {}
-
-  if (ch === '{') {
-    next('{')
-    append('{')
-    white()
-    if (ch === '}') {
-      next('}')
-      append('}')
-      return obj // empty object
-    }
-    indent(1)
-    newLine()
-    while (ch) {
-      key = string()
-      white()
-      next(':')
-      append(': ')
-      obj[key] = value()
-      white()
-      if (ch === '}') {
-        next('}')
-        indent(-1)
-        newLine()
-        append('}')
-        return obj
+    if (this.ch === '{') {
+      this.next('{')
+      this.append('{')
+      this.white()
+      if (this.ch === '}') {
+        this.next('}')
+        this.append('}')
+        return obj // empty object
       }
-      next(',')
-      append(',')
-      newLine()
-      white()
+      this.indent(1)
+      this.newLine()
+      while (this.ch) {
+        const key = this.string()
+        this.white()
+        this.next(':')
+        this.append(': ')
+        obj[key] = this.value()
+        this.white()
+        if (this.ch === '}') {
+          this.next('}')
+          this.indent(-1)
+          this.newLine()
+          this.append('}')
+          return obj
+        }
+        this.next(',')
+        this.append(',')
+        this.newLine()
+        this.white()
+      }
     }
+    this.error('Bad object')
   }
-  error('Bad object')
-}
 
-value = function() {
   // Parse a JSON value. It could be an object, an array, a string, a number,
   // or a word.
-
-  white()
-  switch (ch) {
-    case '{':
-      return object()
-    case '[':
-      return array()
-    case '"':
-      return string()
-    case '-':
-      return number()
-    default:
-      return ch >= '0' && ch <= '9' ? number() : word()
+  value() {
+    this.white()
+    switch (this.ch) {
+      case '{':
+        return this.object()
+      case '[':
+        return this.array()
+      case '"':
+        return this.string()
+      case '-':
+        return this.number()
+      default:
+        return this.ch >= '0' && this.ch <= '9' ? this.number() : this.word()
+    }
   }
-}
-
-// Return the json_parse function. It will have access to all of the above
-// functions and variables.
-
-export default function(source, { tabType = 'string', length = 4 } = {}) {
-  text = source
-  stringified = ''
-  var indentType = tabType === 'tabs' ? '\t' : ' '
-  indentSpace = indentType.repeat(length)
-  gap = 0
-  at = 0
-  line = 0
-  pos = 1
-  ch = ' '
-  value()
-  white()
-  if (ch) {
-    error('Syntax error')
-  }
-
-  return stringified
 }

@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs'
 import path from 'path'
-import parser from '../src/js/pretty'
+import { Parser } from '../src/js/pretty'
 
 describe('parser', () => {
   let failures = null
@@ -22,7 +22,7 @@ describe('parser', () => {
             path.join(__dirname, 'fixtures', file),
             'utf-8'
           )
-          parser(contents)
+          new Parser(contents)
         } catch (err) {
           fails.push({ file, contents, err: err.message })
         }
@@ -44,8 +44,8 @@ describe('parser', () => {
             path.join(__dirname, 'fixtures', file),
             'utf-8'
           )
-          const result = parser(contents)
-          fails.push({ file, contents, result })
+          const result = new Parser(contents)
+          fails.push({ file, contents, result: result.stringified })
         } catch (err) {
           /* Success! */
         }

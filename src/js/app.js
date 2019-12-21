@@ -1,4 +1,4 @@
-import pretty from './pretty'
+import { Parser } from './pretty'
 import './about'
 import './options-form'
 import options from './options'
@@ -87,9 +87,9 @@ function parseCode() {
   let value = code.innerText
 
   try {
-    value = pretty(value, { tabType: options.tabType, length: options.length })
+    const parsed = new Parser(value, options)
     parse.classList.add(success)
-    code.textContent = value
+    code.textContent = parsed.stringified
   } catch (e) {
     code.textContent = e.stringified
     parse.classList.add(error)
