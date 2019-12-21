@@ -174,7 +174,7 @@ export class Parser {
 
   // Parse a string value.
   // When parsing for string values, we must look for " and \ characters.
-  string() {
+  string(keyMode) {
     let value = ''
 
     if (this.ch === '"') {
@@ -182,8 +182,21 @@ export class Parser {
 
       while (this.next()) {
         if (this.ch === '"') {
-          this.append(value, true)
-          this.append(this.ch)
+          // end of a string
+          // try to parse as JSON
+          // if it fails, do the normal thing
+          // otherwie append the result of the parse
+
+          try {
+            if (keyMode === true) throw new Error('nah')
+            const subParser = new Parser(value, this)
+            value = subParser.stringified
+            this.stringified = this.stringified.slice(0, -1)
+            this.append(value)
+          } catch (err) {
+            this.append(value, true)
+            this.append(this.ch)
+          }
           this.next()
           return value
         }
@@ -294,7 +307,7 @@ export class Parser {
       this.indent(1)
       this.newLine()
       while (this.ch) {
-        const key = this.string()
+        const key = this.string(true)
         this.white()
         this.next(':')
         this.append(': ')
