@@ -27,7 +27,8 @@ window.addEventListener('DOMContentLoaded', () => {
   code.addEventListener('paste', cleanPaste)
   code.addEventListener('input', removeErrorMessage)
   code.addEventListener('click', removeErrorMessage)
-  code.addEventListener('keypress', keyPress)
+  code.addEventListener('keydown', handleParseCode)
+  code.addEventListener('keydown', handleInsertText)
   code.focus()
 })
 
@@ -61,8 +62,17 @@ function clearCode() {
   code.innerHTML = ''
 }
 
-function keyPress(e) {
-  e.ctrlKey && (e.keyCode === 13 || e.keyCode === 10) && parseCode()
+function handleParseCode(e) {
+  if (e.ctrlKey && (e.keyCode === 13 || e.keyCode === 10)) return parseCode()
+}
+
+function handleInsertText(e) {
+  // this length-check tries to figure a simple key press
+  // it is is probably not good long-term - may special keys in the future have 1-char lengths?
+  if (e.key.length === 1 && !(e.ctrlKey || e.metaKey || e.altKey)) {
+    e.preventDefault()
+    document.execCommand('insertText', false, e.key)
+  }
 }
 
 function parseCode() {
@@ -71,21 +81,29 @@ function parseCode() {
   errorMessage.classList.remove(parseError)
 
   let value = null
+  let err = null
 
   try {
     const parsed = new Parser(code.innerText, options)
     parse.classList.add(success)
     value = parsed.stringified
   } catch (e) {
+    err = e
     value = e.stringified
-    parse.classList.add(error)
-    errorMessage.classList.add(parseError)
-    errorMessage.innerHTML = ' '.repeat(e.pos) + '^--' + e.message
-    errorMessage.style.top = `${15 * (e.line + 1) + 10}px`
-    setTimeout(() => scrollIntoView(errorMessage), 0)
   }
 
-  code.textContent = value
+  const sel = window.getSelection()
+  const range = document.createRange()
+  sel.removeAllRanges()
+  range.selectNodeContents(code)
+  sel.addRange(range)
+  document.execCommand('insertText', false, value)
 
+  if (err) {
+    parse.classList.add(error)
+    errorMessage.classList.add(parseError)
+    errorMessage.innerHTML = ' '.repeat(err.pos) + '^--' + err.message
+    errorMessage.style.top = `${15 * (err.line + 1) + 10}px`
+    setTimeout(() => scrollIntoView(errorMessage), 0)
   }
 }
