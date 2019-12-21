@@ -24,7 +24,7 @@ module.exports = (mode, argv) => {
           loader: 'babel-loader'
         },
         {
-          test: /\.(less|css)$/,
+          test: /css$/,
           use: [
             {
               loader: MiniCssExtractPlugin.loader
@@ -41,14 +41,6 @@ module.exports = (mode, argv) => {
                 },
                 localsConvention: 'camelCase',
                 importLoaders: 1
-              }
-            },
-            {
-              loader: 'less-loader',
-              options: {
-                sourceMap: true,
-                relativeUrls: true,
-                noIeCompat: true
               }
             }
           ]

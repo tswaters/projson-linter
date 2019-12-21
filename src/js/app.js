@@ -2,8 +2,7 @@ import { Parser } from './pretty'
 import './about'
 import './options-form'
 import options from './options'
-import { error as parseError } from '../styles/app.less'
-import { error, success } from '../styles/button.less'
+import { error, success, form, button } from '../styles/app.css'
 import buttonToggle from './button-toggle'
 
 let clear = null
@@ -12,13 +11,18 @@ let code = null
 let errorMessage = null
 
 window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('options').classList.add(form)
+  document.getElementById('about').classList.add(form)
+
   buttonToggle.register('clear')
   buttonToggle.register('parse')
 
   clear = document.getElementById('clear')
+  clear.classList.add(button)
   clear.addEventListener('click', clearCode)
 
   parse = document.getElementById('parse')
+  parse.classList.add(button)
   parse.addEventListener('click', parseCode)
 
   errorMessage = document.getElementById('parse-error')
@@ -42,7 +46,7 @@ function scrollIntoView(element) {
 }
 
 function removeErrorMessage() {
-  errorMessage.classList.remove(parseError)
+  errorMessage.classList.remove(error)
 }
 
 function cleanPaste(e) {
@@ -56,7 +60,7 @@ function cleanPaste(e) {
 }
 
 function clearCode() {
-  errorMessage.classList.remove(parseError)
+  errorMessage.classList.remove(error)
   parse.classList.remove(error)
   parse.classList.remove(success)
   code.innerHTML = ''
@@ -78,7 +82,7 @@ function handleInsertText(e) {
 function parseCode() {
   parse.classList.remove(error)
   parse.classList.remove(success)
-  errorMessage.classList.remove(parseError)
+  errorMessage.classList.remove(error)
 
   let value = null
   let err = null
@@ -101,7 +105,7 @@ function parseCode() {
 
   if (err) {
     parse.classList.add(error)
-    errorMessage.classList.add(parseError)
+    errorMessage.classList.add(error)
     errorMessage.innerHTML = ' '.repeat(err.pos) + '^--' + err.message
     errorMessage.style.top = `${15 * (err.line + 1) + 10}px`
     setTimeout(() => scrollIntoView(errorMessage), 0)
