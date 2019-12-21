@@ -13,7 +13,7 @@ module.exports = (mode, argv) => {
     devtool:
       argv.mode === 'production' ? 'hidden-source-map' : 'eval-source-map',
     output: {
-      filename: '[chunkhash].js',
+      filename: argv.mode === 'production' ? '[chunkhash].js' : '[name].js',
       path: path.resolve(__dirname, 'dist')
     },
     target: 'web',
@@ -58,7 +58,7 @@ module.exports = (mode, argv) => {
     plugins: [
       new HtmlWebpackPlugin({
         template: 'src/html/index.html',
-        filename: '../index.html',
+        filename: 'index.html',
         minify: {
           collapseWhitespace: argv.mode === 'production'
         }
