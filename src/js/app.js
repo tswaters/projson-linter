@@ -10,7 +10,6 @@ let clear = null
 let parse = null
 let code = null
 let errorMessage = null
-let position = null
 
 window.addEventListener('DOMContentLoaded', () => {
   buttonToggle.register('clear')
@@ -29,20 +28,8 @@ window.addEventListener('DOMContentLoaded', () => {
   code.addEventListener('input', removeErrorMessage)
   code.addEventListener('click', removeErrorMessage)
   code.addEventListener('keypress', keyPress)
-  code.addEventListener('mousedown', saveCursorPosition)
-  code.addEventListener('mouseup', saveCursorPosition)
-  code.addEventListener('keydown', saveCursorPosition)
-  code.addEventListener('keyup', saveCursorPosition)
   code.focus()
 })
-
-function saveCursorPosition() {
-  const sel = window.getSelection()
-  if (sel.rangeCount) {
-    const range = sel.getRangeAt(0)
-    position = range.startOffset
-  }
-}
 
 function scrollIntoView(element) {
   const elementRect = element.getBoundingClientRect()
@@ -59,7 +46,6 @@ function removeErrorMessage() {
 
 function cleanPaste(e) {
   e.preventDefault()
-  saveCursorPosition()
   document.execCommand(
     'insertText',
     false,
@@ -101,12 +87,5 @@ function parseCode() {
 
   code.textContent = value
 
-  // restore cursor position if we found one
-  if (position != null) {
-    const sel = window.getSelection()
-    const range = document.createRange()
-    range.setStart(code.firstChild, position)
-    sel.removeAllRanges()
-    sel.addRange(range)
   }
 }
