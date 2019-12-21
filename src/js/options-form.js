@@ -12,13 +12,6 @@ window.addEventListener('DOMContentLoaded', () => {
   tabs.checked = options.tabType === 'tabs'
   tabs.addEventListener('change', e => (options.tabType = e.target.value))
 
-  const copyAsCrlf = document.getElementById('copy-as-cr-lf')
-  copyAsCrlf.checked = options.copyAsCrLf
-  copyAsCrlf.addEventListener(
-    'change',
-    e => (options.copyAsCrLf = e.target.checked)
-  )
-
   const length = document.getElementById('length')
   length.value = options.length
   length.addEventListener('change', e => (options.length = e.target.value))

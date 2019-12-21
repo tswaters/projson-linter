@@ -24,7 +24,6 @@ window.addEventListener('DOMContentLoaded', () => {
   errorMessage = document.getElementById('parse-error')
 
   code = document.getElementById('src')
-  code.addEventListener('copy', cleanCopy)
   code.addEventListener('paste', cleanPaste)
   code.addEventListener('input', removeErrorMessage)
   code.addEventListener('click', removeErrorMessage)
@@ -43,22 +42,6 @@ function scrollIntoView(element) {
 
 function removeErrorMessage() {
   errorMessage.classList.remove(parseError)
-}
-
-function cleanCopy(e) {
-  let value = window
-    .getSelection()
-    .getRangeAt(0)
-    .cloneContents().textContent
-  if (!value) {
-    return
-  }
-
-  e.preventDefault()
-  if (options.copyAsCrLf) {
-    value = value.replace(/\n/g, '\r\n')
-  }
-  e.clipboardData.setData('text/plain', value)
 }
 
 function cleanPaste(e) {
