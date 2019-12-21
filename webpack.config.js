@@ -5,6 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
+const OfflinePlugin = require('offline-plugin')
 const packageJson = require('./package.json')
 
 module.exports = (mode, argv) => {
@@ -60,6 +61,12 @@ module.exports = (mode, argv) => {
       new MiniCssExtractPlugin({
         filename: `[name]${chunkhash}.css`,
         chunkFilename: `[id]${chunkhash}.css`
+      }),
+      new OfflinePlugin({
+        ServiceWorker: {
+          minify: argv.mode === 'production',
+          events: true
+        }
       })
     ],
     optimization: {

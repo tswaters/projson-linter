@@ -5,6 +5,17 @@ import options from './options'
 import { error, success, form, button } from '../styles/app.css'
 import buttonToggle from './button-toggle'
 
+import * as offline from 'offline-plugin/runtime'
+
+offline.install({
+  onUpdateReady() {
+    offline.applyUpdate()
+  },
+  onUpdated() {
+    window.location.reload()
+  }
+})
+
 let clear = null
 let parse = null
 let code = null
