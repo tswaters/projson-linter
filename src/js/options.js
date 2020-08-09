@@ -4,7 +4,7 @@ const length = Symbol('length')
 const tabType = Symbol('tab-type')
 const theme = Symbol('theme')
 
-const updateTheme = theme => {
+const updateTheme = (theme) => {
   const bodyClass = theme === 'dark' ? darkMode : lightMode
   document.body.classList.remove(darkMode, lightMode)
   document.body.classList.add(bodyClass)

@@ -13,7 +13,7 @@ offline.install({
   },
   onUpdated() {
     window.location.reload()
-  }
+  },
 })
 
 let clear = null
@@ -65,7 +65,7 @@ function cleanPaste(e) {
   document.execCommand(
     'insertText',
     false,
-    e.clipboardData.getData('text/plain')
+    e.clipboardData.getData('text/plain'),
   )
   parseCode()
 }

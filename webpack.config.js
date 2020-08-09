@@ -2,7 +2,7 @@
 
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
 const OfflinePlugin = require('offline-plugin')
@@ -16,38 +16,38 @@ module.exports = (mode, argv) => {
       argv.mode === 'production' ? 'hidden-source-map' : 'eval-source-map',
     output: {
       filename: argv.mode === 'production' ? '[chunkhash].js' : '[name].js',
-      path: path.resolve(__dirname, 'dist')
+      path: path.resolve(__dirname, 'dist'),
     },
     target: 'web',
     module: {
       rules: [
         {
           test: /\.js$/,
-          loader: 'babel-loader'
+          loader: 'babel-loader',
         },
         {
           test: /css$/,
           use: [
             {
-              loader: MiniCssExtractPlugin.loader
+              loader: MiniCssExtractPlugin.loader,
             },
             {
               loader: 'css-loader',
               options: {
                 sourceMap: true,
                 modules: {
+                  exportLocalsConvention: 'camelCase',
                   localIdentName:
                     argv.mode === 'production'
                       ? '[hash:base64:5]'
-                      : '[path][name]__[local]--[hash:base64:5]'
+                      : '[path][name]__[local]--[hash:base64:5]',
                 },
-                localsConvention: 'camelCase',
-                importLoaders: 1
-              }
-            }
-          ]
-        }
-      ]
+                importLoaders: 1,
+              },
+            },
+          ],
+        },
+      ],
     },
     plugins: [
       new HtmlWebpackPlugin({
@@ -55,25 +55,25 @@ module.exports = (mode, argv) => {
         template: 'src/html/index.html',
         filename: 'index.html',
         minify: {
-          collapseWhitespace: argv.mode === 'production'
-        }
+          collapseWhitespace: argv.mode === 'production',
+        },
       }),
       new MiniCssExtractPlugin({
         filename: `[name]${chunkhash}.css`,
-        chunkFilename: `[id]${chunkhash}.css`
+        chunkFilename: `[id]${chunkhash}.css`,
       }),
       new OfflinePlugin({
         ServiceWorker: {
           minify: argv.mode === 'production',
-          events: true
-        }
-      })
+          events: true,
+        },
+      }),
     ],
     optimization: {
       splitChunks: {
-        chunks: 'all'
+        chunks: 'all',
       },
-      minimizer: [new TerserPlugin(), new OptimizeCSSAssetsPlugin({})]
-    }
+      minimizer: [new TerserPlugin(), new CssMinimizerPlugin()],
+    },
   }
 }

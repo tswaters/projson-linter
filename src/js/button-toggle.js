@@ -5,9 +5,9 @@ class ButtonToggle {
     this.buttons = []
     this.src = document.getElementById('src')
     this.closeButtons = Array.from(
-      document.getElementsByClassName('close-button')
+      document.getElementsByClassName('close-button'),
     )
-    this.closeButtons.forEach(item => {
+    this.closeButtons.forEach((item) => {
       item.classList.add(button, closeButton)
       item.addEventListener('click', () => {
         this.toggleForm(false)
@@ -31,13 +31,13 @@ class ButtonToggle {
   toggleForm(shouldShow, id) {
     if (!shouldShow) {
       document.body.classList.remove(hiding)
-      this.buttons.forEach(button => {
+      this.buttons.forEach((button) => {
         button.element &&
           document.getElementById(button.element).classList.remove(showing)
       })
     } else {
       document.body.classList.add(hiding)
-      const current = this.buttons.find(button => button.id === id)
+      const current = this.buttons.find((button) => button.id === id)
       current.element &&
         document.getElementById(current.element).classList.add(showing)
     }
@@ -45,9 +45,9 @@ class ButtonToggle {
 
   toggleButtons(shouldShow) {
     const operation = shouldShow ? 'remove' : 'add'
-    this.closeButtons.forEach(button => button.classList[operation](showing))
+    this.closeButtons.forEach((button) => button.classList[operation](showing))
     this.src.classList[operation](hiding)
-    this.buttons.forEach(button => {
+    this.buttons.forEach((button) => {
       document.getElementById(button.id).classList[operation](hiding)
     })
   }

@@ -9,7 +9,7 @@ const escapee = {
   f: '\f',
   n: '\n',
   r: '\r',
-  t: '\t'
+  t: '\t',
 }
 
 const escapes = {
@@ -19,7 +19,7 @@ const escapes = {
   '\f': '\\f',
   '\r': '\\r',
   '"': '\\"',
-  '\\': '\\\\'
+  '\\': '\\\\',
 }
 
 const escape = (value, shouldEscape) => {
@@ -27,17 +27,17 @@ const escape = (value, shouldEscape) => {
 
   return !shouldEscape || !rx_escapable.test(value)
     ? value
-    : value.replace(rx_escapable, a =>
+    : value.replace(rx_escapable, (a) =>
         escapes[a]
           ? escapes[a]
-          : `0000${a.charCodeAt(0).toString(16)}`.slice(-4)
+          : `0000${a.charCodeAt(0).toString(16)}`.slice(-4),
       )
 }
 
 export class Parser {
   constructor(
     source,
-    { indentType = ' ', indentSize = 2, gap = 0, line = 0 } = {}
+    { indentType = ' ', indentSize = 2, gap = 0, line = 0 } = {},
   ) {
     this.text = source
     this.indentType = indentType
@@ -64,7 +64,7 @@ export class Parser {
       at: this.at,
       pos: this.pos,
       line: this.line,
-      text: this.text
+      text: this.text,
     }
   }
 
