@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "stylelint \"src/styles/*.less\" && eslint src/js",
+    "lint": "stylelint \"src/styles/*.css\" && eslint src/js",
     "prebuild": "rimraf dist",
     "build": "webpack --mode=production",
     "format": "prettier --write **/*.*",
@@ -108,9 +108,7 @@
           ]
         }
       ],
-      "declaration-empty-line-before": [
-        "never"
-      ]
+      "declaration-empty-line-before": "never"
     }
   }
 }

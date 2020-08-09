@@ -45,11 +45,6 @@ html.hiding {
   display: block;
 }
 
-body.hiding :global(#parse-error),
-html.hiding :global(#parse-error) {
-  display: none;
-}
-
 .hiding {
   display: none;
 }
@@ -160,4 +155,9 @@ html.hiding :global(#parse-error) {
 :global(#about-button) {
   z-index: 10;
   bottom: 5px;
+}
+
+body.hiding :global(#parse-error),
+html.hiding :global(#parse-error) {
+  display: none;
 }
