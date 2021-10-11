@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
-const OfflinePlugin = require('offline-plugin')
+const OfflinePlugin = require('@lcdp/offline-plugin')
 const packageJson = require('./package.json')
 
 module.exports = (mode, argv) => {
@@ -35,8 +35,10 @@ module.exports = (mode, argv) => {
               loader: 'css-loader',
               options: {
                 sourceMap: true,
+                esModule: true,
                 modules: {
-                  exportLocalsConvention: 'camelCase',
+                  namedExport: true,
+                  exportLocalsConvention: 'camelCaseOnly',
                   localIdentName:
                     argv.mode === 'production'
                       ? '[hash:base64:5]'

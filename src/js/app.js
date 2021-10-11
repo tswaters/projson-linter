@@ -5,7 +5,7 @@ import options from './options'
 import { error, success, form, button } from '../styles/app.css'
 import buttonToggle from './button-toggle'
 
-import * as offline from 'offline-plugin/runtime'
+import * as offline from '@lcdp/offline-plugin/runtime'
 
 offline.install({
   onUpdateReady() {
