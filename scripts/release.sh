@@ -1,7 +1,12 @@
 #!/bin/bash
 set -e
 
-npm version minor -m "$@"
+type=$1
+shift 1
+
+echo $type
+
+npm version $type -m "$@"
 npm run build
 git symbolic-ref HEAD refs/heads/gh-pages
 git --work-tree "dist" reset --mixed --quiet
