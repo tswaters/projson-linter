@@ -201,8 +201,16 @@ export class Parser {
           return value
         }
 
-        // control characters must be escaped
-        if (/[\u0000-\u001F]/.test(this.ch)) this.error('Bad string')
+        // auto-replace cr/lf with '\r\n'
+        if (/\r/.test(this.ch)) {
+          value += '\\r'
+          continue
+        } else if (/\n/.test(this.ch)) {
+          value += '\\n'
+          continue
+        } else if (/[\u0000-\u001F]/.test(this.ch)) {
+          this.error('Bad string')
+        }
 
         if (this.ch === '\\') {
           this.next()
